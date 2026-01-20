@@ -1,0 +1,167 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Slot CNC Program Generator</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: #f7f7f7;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      color: #222;
+    }.container {
+  width: 100%;
+  max-width: 520px;
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 24px;
+  font-weight: 600;
+  font-size: 20px;
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: #555;
+}
+
+.field {
+  margin-bottom: 16px;
+}
+
+input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  outline: none;
+}
+
+input:focus {
+  border-color: #000;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 8px;
+  border: none;
+  background: #000;
+  color: #fff;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+textarea {
+  width: 100%;
+  height: 280px;
+  margin-top: 20px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-family: Consolas, monospace;
+  font-size: 13px;
+  resize: none;
+  outline: none;
+}
+
+.note {
+  text-align: center;
+  font-size: 12px;
+  color: #888;
+  margin-top: 12px;
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Slot CNC Program Generator</h2><div class="field">
+  <label>Slot Length (mm)</label>
+  <input type="number" id="length" placeholder="60" />
+</div>
+
+<div class="field">
+  <label>Slot Width (mm)</label>
+  <input type="number" id="width" placeholder="16" />
+</div>
+
+<div class="field">
+  <label>Both Side Radius (mm)</label>
+  <input type="number" id="radius" placeholder="8" />
+</div>
+
+<div class="field">
+  <label>Cutter Diameter (mm)</label>
+  <input type="number" id="cutter" placeholder="4" />
+</div>
+
+<div class="field">
+  <label>Depth (mm)</label>
+  <input type="number" id="depth" placeholder="10" />
+</div>
+
+<button onclick="generateProgram()">Generate Program</button>
+
+<textarea id="output" placeholder="Generated CNC G-code will appear here..."></textarea>
+
+<div class="note">© Designed & Developed by PradipKoley • GitHub<br></div>
+
+  </div>  <script>
+    function generateProgram() {
+      const L = parseFloat(document.getElementById('length').value);
+      const W = parseFloat(document.getElementById('width').value);
+      const R = parseFloat(document.getElementById('radius').value);
+      const C = parseFloat(document.getElementById('cutter').value);
+      const D = parseFloat(document.getElementById('depth').value);
+
+      if (isNaN(L) || isNaN(W) || isNaN(R) || isNaN(C) || isNaN(D)) {
+        alert('Please enter all values');
+        return;
+      }
+
+      const halfLen = L / 2 - R;
+      const yOffset = W / 2 - C / 2;
+
+      const gcode = `%
+O0001 (AUTO SLOT PROGRAM)
+G21 G17 G90 G40 G49 G80
+T01 M06 (CUTTER Ø${C}mm)
+S3000 M03
+G54
+G0 Z5.0
+
+G0 X-${halfLen} Y-${yOffset}
+G1 Z-${D} F150
+G1 X${halfLen} Y-${yOffset} F300
+G02 X${halfLen} Y${yOffset} I0 J${yOffset}
+G1 X-${halfLen} Y${yOffset}
+G02 X-${halfLen} Y-${yOffset} I0 J-${yOffset}
+
+G0 Z5.0
+M05
+M30
+%`;
+
+      document.getElementById('output').value = gcode;
+    }
+  </script></body>
+</html>
